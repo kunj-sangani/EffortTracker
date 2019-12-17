@@ -1,0 +1,29 @@
+{
+  "@pnp/generator-spfx": {
+    "framework": "react",
+    "pnpFramework": "reactjs.plus",
+    "pnp-libraries": [
+      "@pnp/pnpjs",
+      "ouifr@6",
+      "rush@2.9"
+    ],
+    "pnp-ci": [
+      "azure"
+    ],
+    "pnp-vetting": [],
+    "spfxenv": "spo",
+    "pnp-testing": []
+  },
+  "@microsoft/generator-sharepoint": {
+    "environment": "spo",
+    "framework": "react",
+    "isCreatingSolution": true,
+    "whichFolder": "subdir",
+    "version": "1.9.1",
+    "libraryName": "effort-tracker-visualization",
+    "libraryId": "44f829ba-bd38-4e37-8bb2-6dbb43336996",
+    "packageManager": "npm",
+    "isDomainIsolated": false,
+    "componentType": "webpart"
+  }
+}

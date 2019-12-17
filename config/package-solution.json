@@ -1,0 +1,13 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/spfx-build/package-solution.schema.json",
+  "solution": {
+    "name": "effort-tracker-visualization-client-side-solution",
+    "id": "44f829ba-bd38-4e37-8bb2-6dbb43336996",
+    "version": "1.0.0.0",
+    "includeClientSideAssets": true,
+    "isDomainIsolated": false
+  },
+  "paths": {
+    "zippedPackage": "solution/effort-tracker-visualization.sppkg"
+  }
+}

@@ -1,0 +1,1 @@
+{"version":3,"file":"IEfforTrackerState.d.ts","sourceRoot":"","sources":["../../../../src/webparts/efforTracker/components/IEfforTrackerState.ts"],"names":[],"mappings":"AAAA,OAAO,EAAE,UAAU,EAAE,MAAM,uCAAuC,CAAC;AAEnE,MAAM,WAAW,kBAAkB;IAC/B,WAAW,EAAE,MAAM,CAAC;IACpB,KAAK,EAAC,GAAG,CAAC;IACV,UAAU,EAAC,UAAU,EAAE,CAAC;CACzB"}
