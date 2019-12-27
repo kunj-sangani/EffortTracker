@@ -32,7 +32,8 @@
     "moment-range": "^4.0.2",
     "office-ui-fabric-react": "6.189.2",
     "react": "16.8.5",
-    "react-dom": "16.8.5"
+    "react-dom": "16.8.5",
+    "xlsx": "^0.15.4"
   },
   "resolutions": {
     "@types/react": "16.8.8"

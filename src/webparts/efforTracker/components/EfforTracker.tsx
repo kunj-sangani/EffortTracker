@@ -14,20 +14,20 @@ export default class EfforTracker extends React.Component<IEfforTrackerProps, IE
     this.datalayer = new DataLayer(props.datetime);
     this.state = {
       description: "",
-      items:[],
-      viewFields:[]
+      items: [],
+      viewFields: []
     };
-    this.datalayer.processFetchedData(this.props.effortlist, this.props.employeelist).then((val) => {
-      if(val){
-        let tempViewFields:IViewField[]=[];
-        tempViewFields.push({name:"ResourceName",displayName:"Employee Name",minWidth:150});
-        Object.keys(this.datalayer.weekObjectMaaping).map((key)=>{
-          let temViewField:IViewField={name:this.datalayer.weekObjectMaaping[key],displayName:moment(key).format('DD-MM-YY'),minWidth:100};
+    this.datalayer.processFetchedData(this.props.effortlist, this.props.filerelativePath).then((val) => {
+      if (val) {
+        let tempViewFields: IViewField[] = [];
+        tempViewFields.push({ name: "ResourceName", displayName: "Employee Name", minWidth: 150 });
+        Object.keys(this.datalayer.weekObjectMaaping).map((key) => {
+          let temViewField: IViewField = { name: this.datalayer.weekObjectMaaping[key], displayName: moment(key).format('DD-MM-YY'), minWidth: 100 };
           tempViewFields.push(temViewField);
         });
         this.setState({
-          viewFields:tempViewFields,
-          items:this.datalayer.effortDataBasedOnUser
+          viewFields: tempViewFields,
+          items: this.datalayer.effortDataBasedOnUser
         });
       }
     }).catch(error => console.log(error));

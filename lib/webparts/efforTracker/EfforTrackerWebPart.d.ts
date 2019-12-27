@@ -6,6 +6,7 @@ export interface IEfforTrackerWebPartProps {
     effortlist: string;
     employeelist: string;
     datetime: IDateTimeFieldValue;
+    filerelativePath: string;
 }
 export default class EfforTrackerWebPart extends BaseClientSideWebPart<IEfforTrackerWebPartProps> {
     onInit(): Promise<void>;

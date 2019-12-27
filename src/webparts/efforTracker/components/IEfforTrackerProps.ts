@@ -7,4 +7,5 @@ export interface IEfforTrackerProps {
   employeelist:string;
   context:WebPartContext;
   datetime:IDateTimeFieldValue;
+  filerelativePath:string;
 }

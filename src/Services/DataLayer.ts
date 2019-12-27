@@ -3,6 +3,7 @@ import * as _ from 'lodash';
 import * as Moment from 'moment';
 import { extendMoment } from 'moment-range';
 import { IDateTimeFieldValue } from "@pnp/spfx-property-controls/lib/PropertyFieldDateTimePicker";
+import * as XLSX from 'xlsx';
 
 const moment = extendMoment(Moment);
 
@@ -74,7 +75,7 @@ export default class DataLayer {
                     countdays++;
                     let tempDate: any = currDate.format('YYYY-MM-DD');
                     this.weekObjectMaaping[currDate.format('YYYYMMDD')] = `w${index}d${countdays}`;
-                    sp.web.lists.getById(efforList).items.filter(`Date ge datetime'${tempDate}T00:00:00Z' and Date le datetime'${tempDate}T23:59:59Z'`).top(2000).inBatch(batch).getPaged().then(p => {
+                    sp.web.lists.getById(efforList).items.filter(`Date ge datetime'${tempDate}T00:00:00Z' and Date le datetime'${tempDate}T23:59:59Z'`).select("*,Resource/EMail").expand("Resource").top(2000).inBatch(batch).getPaged().then(p => {
                         if (p.results.length > 0) {
                             if (this.efforData === undefined) {
                                 this.efforData = p.results;
@@ -141,41 +142,67 @@ export default class DataLayer {
 
     }
 
-    public async processFetchedData(efforList: string, employeeList: string): Promise<any> {
+    public async processFetchedData(efforList: string, filerelativePath: string): Promise<any> {
         return new Promise<any>((resolve, reject) => {
-            this.fetchEmployeeData(employeeList);
-            this.getEfforData(efforList).then((data) => {
-                console.log(this.efforData);
-                console.log(this.employeeData);
-                this.employeeData.map((val, index) => {
-                    let tempData = _.filter(this.efforData, { 'ResourceId': val.Employee.Id });
-                    console.log(tempData);
-                    let tempObject: any = {};
-                    tempObject.ResourceId = val.Employee.Id;
-                    tempObject.ResourceName = val.Employee.Title;
-                    tempObject.ResourceEMail = val.Employee.EMail;
-                    tempData.map((valueofResource) => {
-                        console.log(valueofResource);
-                        let tempObjDate = this.weekObjectMaaping[moment(valueofResource["Date"]).format('YYYYMMDD')];
-                        if (tempObject[tempObjDate] === undefined) {
-                            tempObject[tempObjDate] = valueofResource["Effort"];
-                        } else {
-                            tempObject[tempObjDate] += valueofResource["Effort"];
-                        }
-                    });
-                    this.effortDataBasedOnUser.push(tempObject);
-                });
-                resolve(true);
-            }).catch(error => {console.log(error); reject(false);});
+            this.fetchDatafromFile(filerelativePath).then((resolvedData) => {
+                if (resolvedData) {
+                    this.getEfforData(efforList).then((data) => {
+                        console.log(this.efforData);
+                        console.log(this.employeeData);
+                        let slicedEmployeeData: any = this.employeeData.slice(1);
+                        slicedEmployeeData.map((val, index) => {
+                            let tempData = _.filter(this.efforData, (value) => { return value.Resource.EMail === val[1]; });
+                            console.log(tempData);
+                            let tempObject: any = {};
+                            tempObject.ResourceName = val[0];
+                            tempObject.ResourceEMail = val[1];
+                            tempData.map((valueofResource) => {
+                                console.log(valueofResource);
+                                let tempObjDate = this.weekObjectMaaping[moment(valueofResource["Date"]).format('YYYYMMDD')];
+                                if (tempObjDate !== undefined) {
+                                    let objectName: any = `w${parseInt(tempObjDate[1])}t`;
+                                    if (tempObject[objectName] === undefined) {
+                                        tempObject[objectName] = valueofResource["Effort"];
+                                        if (tempObject["te"] === undefined) {
+                                            tempObject["te"] = valueofResource["Effort"];
+                                        } else {
+                                            tempObject["te"] += valueofResource["Effort"];
+                                        }
+                                    } else {
+                                        tempObject[objectName] += valueofResource["Effort"];
+                                        tempObject["te"] += valueofResource["Effort"];
+                                    }
+                                }
+                                if (tempObject[tempObjDate] === undefined) {
+                                    tempObject[tempObjDate] = valueofResource["Effort"];
+                                } else {
+                                    tempObject[tempObjDate] += valueofResource["Effort"];
+                                }
+                            });
+                            this.effortDataBasedOnUser.push(tempObject);
+                        });
+                        console.log(this.effortDataBasedOnUser);
+                        resolve(true);
+                    }).catch(error => { console.log(error); reject(false); });
+                }
+            }).catch((error) => {
+                console.log(error);
+            });
         });
     }
 
-    private fetchEmployeeData(employeeList: string) {
-        sp.web.lists.getById(employeeList).items.select("Employee/EMail,Employee/Title,Employee/Id").expand('Employee').top(2000).getPaged().then(p => {
-            this.employeeData = p.results;
-            if (p.hasNext) {
-                p.getNext().then(p2 => {
-                    this.employeeData = [...this.employeeData, ...p2.results];
+    private async fetchDatafromFile(filerelativePath: string): Promise<any> {
+        return new Promise<any>((resolve, reject) => {
+            if (filerelativePath) {
+                sp.web.getFileByServerRelativeUrl(filerelativePath).getBuffer().then((buffer: ArrayBuffer) => {
+                    let workbook = XLSX.read(buffer, { type: "buffer" });
+                    this.employeeData = XLSX.utils.sheet_to_json(workbook.Sheets["allocation"], { header: 1 });
+                    console.log(this.employeeData);
+                    let holidaydata = XLSX.utils.sheet_to_json(workbook.Sheets["holiday"], { header: 1 });
+                    console.log(holidaydata);
+                    resolve(true);
+                }).catch((error) => {
+                    reject(error);
                 });
             }
         });

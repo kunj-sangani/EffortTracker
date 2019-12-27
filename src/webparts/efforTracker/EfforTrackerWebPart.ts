@@ -13,12 +13,15 @@ import EfforTracker from './components/EfforTracker';
 import { IEfforTrackerProps } from './components/IEfforTrackerProps';
 import { PropertyFieldListPicker, PropertyFieldListPickerOrderBy } from '@pnp/spfx-property-controls/lib/PropertyFieldListPicker';
 import { PropertyFieldDateTimePicker, DateConvention, TimeConvention, IDateTimeFieldValue } from '@pnp/spfx-property-controls/lib/PropertyFieldDateTimePicker';
+import { CalloutTriggers } from '@pnp/spfx-property-controls/lib/PropertyFieldHeader';
+import { PropertyFieldTextWithCallout } from '@pnp/spfx-property-controls/lib/PropertyFieldTextWithCallout';
 
 export interface IEfforTrackerWebPartProps {
   description: string;
   effortlist: string;
   employeelist: string;
   datetime: IDateTimeFieldValue;
+  filerelativePath: string;
 }
 
 export default class EfforTrackerWebPart extends BaseClientSideWebPart<IEfforTrackerWebPartProps> {
@@ -43,7 +46,8 @@ export default class EfforTrackerWebPart extends BaseClientSideWebPart<IEfforTra
         effortlist: this.properties.effortlist,
         employeelist: this.properties.employeelist,
         context: this.context,
-        datetime: this.properties.datetime
+        datetime: this.properties.datetime,
+        filerelativePath: this.properties.filerelativePath
       }
     );
 
@@ -84,18 +88,13 @@ export default class EfforTrackerWebPart extends BaseClientSideWebPart<IEfforTra
                   onGetErrorMessage: null,
                   deferredValidationTime: 0,
                   key: 'listPickerFieldId'
-                }), PropertyFieldListPicker('employeelist', {
-                  label: 'Select a employee list',
-                  selectedList: this.properties.employeelist,
-                  includeHidden: false,
-                  orderBy: PropertyFieldListPickerOrderBy.Title,
-                  disabled: false,
-                  onPropertyChange: this.onPropertyPaneFieldChanged.bind(this),
-                  properties: this.properties,
-                  context: this.context,
-                  onGetErrorMessage: null,
-                  deferredValidationTime: 0,
-                  key: 'listPickerFieldId'
+                }), PropertyFieldTextWithCallout('filerelativePath', {
+                  calloutTrigger: CalloutTriggers.Hover,
+                  key: 'textInfoHeaderFieldId',
+                  label: 'File path for the employee details',
+                  calloutContent: React.createElement('span', {}, 'file path should be in the format /sites/{sitecollectionname}/{libraryname}/{?folder}/{fileName}'),
+                  calloutWidth: 150,
+                  value: this.properties.filerelativePath
                 }),
                 PropertyFieldDateTimePicker('datetime', {
                   label: 'Select the date and time',

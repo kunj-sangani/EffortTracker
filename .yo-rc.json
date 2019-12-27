@@ -17,7 +17,7 @@
   "@microsoft/generator-sharepoint": {
     "environment": "spo",
     "framework": "react",
-    "isCreatingSolution": true,
+    "isCreatingSolution": false,
     "whichFolder": "subdir",
     "version": "1.9.1",
     "libraryName": "effort-tracker-visualization",

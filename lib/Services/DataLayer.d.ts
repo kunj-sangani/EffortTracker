@@ -13,7 +13,7 @@ export default class DataLayer {
     constructor(datetime?: IDateTimeFieldValue);
     private getEfforData;
     private getWeekDays;
-    processFetchedData(efforList: string, employeeList: string): Promise<any>;
-    private fetchEmployeeData;
+    processFetchedData(efforList: string, filerelativePath: string): Promise<any>;
+    private fetchDatafromFile;
 }
 //# sourceMappingURL=DataLayer.d.ts.map

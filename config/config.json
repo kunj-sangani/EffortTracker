@@ -9,12 +9,21 @@
           "manifest": "./src/webparts/efforTracker/EfforTrackerWebPart.manifest.json"
         }
       ]
+    },
+    "effort-utilization-chart-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/effortUtilizationChart/EffortUtilizationChartWebPart.js",
+          "manifest": "./src/webparts/effortUtilizationChart/EffortUtilizationChartWebPart.manifest.json"
+        }
+      ]
     }
   },
   "externals": {},
   "localizedResources": {
     "EfforTrackerWebPartStrings": "lib/webparts/efforTracker/loc/{locale}.js",
     "PropertyControlStrings": "node_modules/@pnp/spfx-property-controls/lib/loc/{locale}.js",
-    "ControlStrings": "node_modules/@pnp/spfx-controls-react/lib/loc/{locale}.js"
+    "ControlStrings": "node_modules/@pnp/spfx-controls-react/lib/loc/{locale}.js",
+    "EffortUtilizationChartWebPartStrings": "lib/webparts/effortUtilizationChart/loc/{locale}.js"
   }
 }
