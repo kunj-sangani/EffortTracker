@@ -50,9 +50,30 @@ export default class DataLayer {
     }
 
 
+    private _weekDaysMapping: any;
+    public get weekDaysMapping(): any {
+        return this._weekDaysMapping;
+    }
+    public set weekDaysMapping(v: any) {
+        this._weekDaysMapping = v;
+    }
+
+
+    private _holidayData: any;
+    public get holidayData(): any {
+        return this._holidayData;
+    }
+    public set holidayData(v: any) {
+        this._holidayData = v;
+    }
+
+
+
+
     constructor(datetime?: IDateTimeFieldValue) {
         this.effortDataBasedOnUser = [];
         this.weekObjectMaaping = {};
+        this.weekDaysMapping = {};
         if (datetime) {
             this.getWeekDays(moment(datetime.value).month(), moment(datetime.value).year());
         }
@@ -60,7 +81,6 @@ export default class DataLayer {
 
     private async getEfforData(efforList: string): Promise<any> {
         return new Promise<any>((resolve, reject) => {
-            console.log(this.weekData);
             let batch = sp.createBatch();
             let count: number = 0;
             this.weekData.map((val, index) => {
@@ -75,6 +95,7 @@ export default class DataLayer {
                     countdays++;
                     let tempDate: any = currDate.format('YYYY-MM-DD');
                     this.weekObjectMaaping[currDate.format('YYYYMMDD')] = `w${index}d${countdays}`;
+                    this.weekDaysMapping[`w${index}`] = countdays;
                     sp.web.lists.getById(efforList).items.filter(`Date ge datetime'${tempDate}T00:00:00Z' and Date le datetime'${tempDate}T23:59:59Z'`).select("*,Resource/EMail").expand("Resource").top(2000).inBatch(batch).getPaged().then(p => {
                         if (p.results.length > 0) {
                             if (this.efforData === undefined) {
@@ -87,7 +108,6 @@ export default class DataLayer {
                         if (count === 0) {
                             resolve(this.efforData);
                         }
-                        // console.log(JSON.stringify(p.results, null, 4));
                     }).catch((error) => {
                         count--;
                         if (count === 0) {
@@ -103,9 +123,9 @@ export default class DataLayer {
 
     private getWeekDays(month: number, year: number) {
         if (month && year) {
-            let startDate: any = Moment.utc([year, month]);
-            let firstDay: any = Moment(startDate).startOf('month');
-            let endDay: any = Moment(startDate).endOf('month');
+            let startDate: any = moment.utc([year, month]);
+            let firstDay: any = moment(startDate).startOf('month');
+            let endDay: any = moment(startDate).endOf('month');
             let currDate: any = moment(startDate).startOf('day');
             let lastDate: any = moment(endDay).startOf('day');
             let weeks: any = [];
@@ -117,13 +137,13 @@ export default class DataLayer {
             let calendar: any = [];
             for (let index = 0; index < weeks.length; index++) {
                 var weeknumber = weeks[index];
-
-                let firstWeekDay: any = Moment().year(year).month(month).week(weeknumber).day(1);
-                let lastWeekDay: any = Moment().year(year).month(month).week(weeknumber).day(5);
+                let yearstartDate: any = moment.utc([year, 0]);
+                let firstWeekDay: any = moment(yearstartDate).year(year).month(month).week(weeknumber).day(1);
+                let lastWeekDay: any = moment(yearstartDate).year(year).month(month).week(weeknumber).day(5);
                 if (month == 11 && (weeks.length - 1) == index) {
-                    firstWeekDay = Moment().year(year).month(month).week(weeks[index - 1]).day(1);
+                    firstWeekDay = moment(yearstartDate).year(year).month(month).week(weeks[index - 1]).day(1);
                     firstWeekDay.add(7, "day");
-                    lastWeekDay = Moment().year(year).month(month).week(weeks[index - 1]).day(5);
+                    lastWeekDay = moment(yearstartDate).year(year).month(month).week(weeks[index - 1]).day(5);
                     lastWeekDay.add(6, "day");
                 }
 
@@ -147,38 +167,40 @@ export default class DataLayer {
             this.fetchDatafromFile(filerelativePath).then((resolvedData) => {
                 if (resolvedData) {
                     this.getEfforData(efforList).then((data) => {
-                        console.log(this.efforData);
-                        console.log(this.employeeData);
                         let slicedEmployeeData: any = this.employeeData.slice(1);
                         slicedEmployeeData.map((val, index) => {
                             let tempData = _.filter(this.efforData, (value) => { return value.Resource.EMail === val[1]; });
-                            console.log(tempData);
                             let tempObject: any = {};
                             tempObject.ResourceName = val[0];
                             tempObject.ResourceEMail = val[1];
-                            tempData.map((valueofResource) => {
-                                console.log(valueofResource);
-                                let tempObjDate = this.weekObjectMaaping[moment(valueofResource["Date"]).format('YYYYMMDD')];
-                                if (tempObjDate !== undefined) {
-                                    let objectName: any = `w${parseInt(tempObjDate[1])}t`;
-                                    if (tempObject[objectName] === undefined) {
-                                        tempObject[objectName] = valueofResource["Effort"];
-                                        if (tempObject["te"] === undefined) {
-                                            tempObject["te"] = valueofResource["Effort"];
+                            tempObject.ResourceLocation = val[2];
+                            let totalEfforts = 0;
+                            Object.keys(this.weekObjectMaaping).map((weekval) => {
+                                let tempValues: any = _.filter(tempData,
+                                    (items) => {
+                                        return items.Date.indexOf(
+                                            moment(weekval).format('YYYY-MM-DD')
+                                        ) > -1;
+                                    });
+                                let objectName: any = `w${parseInt(this.weekObjectMaaping[weekval][1])}t`;
+                                tempObject[objectName] = tempObject[objectName] === undefined ? 0 : tempObject[objectName];
+                                if (tempValues.length > 0) {
+                                    tempValues.map((effortval) => {
+                                        if (tempObject[this.weekObjectMaaping[weekval]] === undefined) {
+                                            tempObject[this.weekObjectMaaping[weekval]] = effortval["Effort"];
+                                            totalEfforts += effortval["Effort"];
+                                            tempObject[objectName] += effortval["Effort"];
                                         } else {
-                                            tempObject["te"] += valueofResource["Effort"];
+                                            tempObject[this.weekObjectMaaping[weekval]] += effortval["Effort"];
+                                            totalEfforts += effortval["Effort"];
+                                            tempObject[objectName] += effortval["Effort"];
                                         }
-                                    } else {
-                                        tempObject[objectName] += valueofResource["Effort"];
-                                        tempObject["te"] += valueofResource["Effort"];
-                                    }
-                                }
-                                if (tempObject[tempObjDate] === undefined) {
-                                    tempObject[tempObjDate] = valueofResource["Effort"];
+                                    });
                                 } else {
-                                    tempObject[tempObjDate] += valueofResource["Effort"];
+                                    tempObject[this.weekObjectMaaping[weekval]] = 0;
                                 }
                             });
+                            tempObject["te"] = totalEfforts;
                             this.effortDataBasedOnUser.push(tempObject);
                         });
                         console.log(this.effortDataBasedOnUser);
@@ -200,6 +222,7 @@ export default class DataLayer {
                     console.log(this.employeeData);
                     let holidaydata = XLSX.utils.sheet_to_json(workbook.Sheets["holiday"], { header: 1 });
                     console.log(holidaydata);
+                    this.holidayData = holidaydata;
                     resolve(true);
                 }).catch((error) => {
                     reject(error);
@@ -208,4 +231,36 @@ export default class DataLayer {
         });
     }
 
+    public getChartLabelsData(): any {
+        let tempArray = [];
+        Object.keys(this.weekDaysMapping).map((val, index) => {
+            tempArray.push(`Week ${index} data`);
+        });
+        return tempArray;
+    }
+
+    public getChartDataSetData(): any {
+        let weekAvailableEffortArray = _.times(Object.keys(this.weekDaysMapping).length, _.constant(0));
+        let weekUsedEffortArray = _.times(Object.keys(this.weekDaysMapping).length, _.constant(0));
+        let weekUnUsedEffortArray = _.times(Object.keys(this.weekDaysMapping).length, _.constant(0));
+        this.holidayData.map((valholiday, indexholiday) => {
+            if (indexholiday !== 0) {
+                let employeeBasedOnLocation = _.filter(this.effortDataBasedOnUser, ["ResourceLocation", valholiday[0]]);
+                // console.log(employeeBasedOnLocation);
+                let employeeStrengthBasedOnLocation = employeeBasedOnLocation.length;
+                Object.keys(this.weekDaysMapping).map((val, index) => {
+                    let weekAvailableEffort: number = (parseInt(this.weekDaysMapping[val], 10) - parseInt(valholiday[index + 1], 10)) * 8 * employeeStrengthBasedOnLocation;
+                    weekAvailableEffortArray[index] = weekAvailableEffortArray[index] + weekAvailableEffort;
+                    weekUnUsedEffortArray[index] = weekUnUsedEffortArray[index] + weekAvailableEffort;
+                    employeeBasedOnLocation.map(valEachEmployee => {
+                        weekUsedEffortArray[index] += parseInt(valEachEmployee[`${val}t`]);
+                        weekUnUsedEffortArray[index] -= parseInt(valEachEmployee[`${val}t`]);
+                    });
+                });
+            }
+        });
+        return {weekAvailableEffortArray:weekAvailableEffortArray,
+            weekUsedEffortArray:weekUsedEffortArray,
+            weekUnUsedEffortArray:weekUnUsedEffortArray}; 
+    }
 }

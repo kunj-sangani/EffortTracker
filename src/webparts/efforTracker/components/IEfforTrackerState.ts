@@ -4,4 +4,6 @@ export interface IEfforTrackerState {
   description: string;
   items: any;
   viewFields: IViewField[];
+  effortChartData: Chart.ChartData;
+  monthlyEffortdata:Chart.ChartData;
 }
