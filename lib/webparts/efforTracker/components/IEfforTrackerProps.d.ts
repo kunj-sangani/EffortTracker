@@ -7,5 +7,7 @@ export interface IEfforTrackerProps {
     context: WebPartContext;
     datetime: IDateTimeFieldValue;
     filerelativePath: string;
+    offshore: string;
+    onsite: string;
 }
 //# sourceMappingURL=IEfforTrackerProps.d.ts.map

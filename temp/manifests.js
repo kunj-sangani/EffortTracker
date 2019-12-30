@@ -948,6 +948,7 @@ var MANIFESTS_ARRAY = [
     "version": "0.0.1",
     "manifestVersion": 2,
     "requiresCustomScript": false,
+    "supportsFullBleed": true,
     "supportedHosts": [
       "SharePointWebPart"
     ],

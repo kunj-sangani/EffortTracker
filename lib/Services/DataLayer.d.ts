@@ -20,6 +20,6 @@ export default class DataLayer {
     processFetchedData(efforList: string, filerelativePath: string): Promise<any>;
     private fetchDatafromFile;
     getChartLabelsData(): any;
-    getChartDataSetData(): any;
+    getChartDataSetData(offshore: string, onsite: string): any;
 }
 //# sourceMappingURL=DataLayer.d.ts.map

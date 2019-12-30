@@ -3,9 +3,11 @@ import { IDateTimeFieldValue } from "@pnp/spfx-property-controls/lib/PropertyFie
 
 export interface IEfforTrackerProps {
   description: string;
-  effortlist:string;
-  employeelist:string;
-  context:WebPartContext;
-  datetime:IDateTimeFieldValue;
-  filerelativePath:string;
+  effortlist: string;
+  employeelist: string;
+  context: WebPartContext;
+  datetime: IDateTimeFieldValue;
+  filerelativePath: string;
+  offshore: string;
+  onsite: string;
 }

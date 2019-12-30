@@ -22,6 +22,8 @@ export interface IEfforTrackerWebPartProps {
   employeelist: string;
   datetime: IDateTimeFieldValue;
   filerelativePath: string;
+  offshore: string;
+  onsite: string;
 }
 
 export default class EfforTrackerWebPart extends BaseClientSideWebPart<IEfforTrackerWebPartProps> {
@@ -47,7 +49,9 @@ export default class EfforTrackerWebPart extends BaseClientSideWebPart<IEfforTra
         employeelist: this.properties.employeelist,
         context: this.context,
         datetime: this.properties.datetime,
-        filerelativePath: this.properties.filerelativePath
+        filerelativePath: this.properties.filerelativePath,
+        offshore: this.properties.offshore,
+        onsite: this.properties.onsite
       }
     );
 
@@ -95,6 +99,20 @@ export default class EfforTrackerWebPart extends BaseClientSideWebPart<IEfforTra
                   calloutContent: React.createElement('span', {}, 'file path should be in the format /sites/{sitecollectionname}/{libraryname}/{?folder}/{fileName}'),
                   calloutWidth: 150,
                   value: this.properties.filerelativePath
+                }), PropertyFieldTextWithCallout('offshore', {
+                  calloutTrigger: CalloutTriggers.Hover,
+                  key: 'textInfoHeaderFieldId',
+                  label: 'off shore locations',
+                  calloutContent: React.createElement('span', {}, 'Please enter the value in "," seperated manner'),
+                  calloutWidth: 150,
+                  value: this.properties.offshore
+                }), PropertyFieldTextWithCallout('onsite', {
+                  calloutTrigger: CalloutTriggers.Hover,
+                  key: 'textInfoHeaderFieldId',
+                  label: 'on site locations',
+                  calloutContent: React.createElement('span', {}, 'Please enter the value in "," seperated manner'),
+                  calloutWidth: 150,
+                  value: this.properties.onsite
                 }),
                 PropertyFieldDateTimePicker('datetime', {
                   label: 'Select the date and time',

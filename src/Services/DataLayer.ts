@@ -174,6 +174,10 @@ export default class DataLayer {
                             tempObject.ResourceName = val[0];
                             tempObject.ResourceEMail = val[1];
                             tempObject.ResourceLocation = val[2];
+                            for (let i = 0; i < this.weekData.length; i++) {
+                                console.log(val[i + 3]);
+                                tempObject[`w${i}a`] = val[i + 3];
+                            }
                             let totalEfforts = 0;
                             Object.keys(this.weekObjectMaaping).map((weekval) => {
                                 let tempValues: any = _.filter(tempData,
@@ -239,17 +243,31 @@ export default class DataLayer {
         return tempArray;
     }
 
-    public getChartDataSetData(): any {
+    public getChartDataSetData(offshore: string, onsite: string): any {
         let weekAvailableEffortArray = _.times(Object.keys(this.weekDaysMapping).length, _.constant(0));
         let weekUsedEffortArray = _.times(Object.keys(this.weekDaysMapping).length, _.constant(0));
         let weekUnUsedEffortArray = _.times(Object.keys(this.weekDaysMapping).length, _.constant(0));
         this.holidayData.map((valholiday, indexholiday) => {
             if (indexholiday !== 0) {
                 let employeeBasedOnLocation = _.filter(this.effortDataBasedOnUser, ["ResourceLocation", valholiday[0]]);
-                // console.log(employeeBasedOnLocation);
-                let employeeStrengthBasedOnLocation = employeeBasedOnLocation.length;
+                console.log(employeeBasedOnLocation);
                 Object.keys(this.weekDaysMapping).map((val, index) => {
-                    let weekAvailableEffort: number = (parseInt(this.weekDaysMapping[val], 10) - parseInt(valholiday[index + 1], 10)) * 8 * employeeStrengthBasedOnLocation;
+                    let weekAvailableEffort: number = 0;
+                    let employeeStrengthBasedOnLocation: number = 0;
+                    employeeBasedOnLocation.map(valEmployee => {
+                        employeeStrengthBasedOnLocation += valEmployee[`w${index}a`];
+                    });
+                    if (offshore && onsite) {
+                        let offshoreArray = offshore.split(',');
+                        let onsiteArray = onsite.split(',');
+                        if (_.indexOf(offshoreArray, valholiday[0]) > -1) {
+                            weekAvailableEffort = (parseInt(this.weekDaysMapping[val], 10) - parseInt(valholiday[index + 1], 10)) * 9 * employeeStrengthBasedOnLocation;
+                        } else if (_.indexOf(onsiteArray, valholiday[0]) > -1) {
+                            weekAvailableEffort = (parseInt(this.weekDaysMapping[val], 10) - parseInt(valholiday[index + 1], 10)) * 8 * employeeStrengthBasedOnLocation;
+                        }
+                    } else {
+                        weekAvailableEffort = (parseInt(this.weekDaysMapping[val], 10) - parseInt(valholiday[index + 1], 10)) * 8 * employeeStrengthBasedOnLocation;
+                    }
                     weekAvailableEffortArray[index] = weekAvailableEffortArray[index] + weekAvailableEffort;
                     weekUnUsedEffortArray[index] = weekUnUsedEffortArray[index] + weekAvailableEffort;
                     employeeBasedOnLocation.map(valEachEmployee => {
@@ -259,8 +277,10 @@ export default class DataLayer {
                 });
             }
         });
-        return {weekAvailableEffortArray:weekAvailableEffortArray,
-            weekUsedEffortArray:weekUsedEffortArray,
-            weekUnUsedEffortArray:weekUnUsedEffortArray}; 
+        return {
+            weekAvailableEffortArray: weekAvailableEffortArray,
+            weekUsedEffortArray: weekUsedEffortArray,
+            weekUnUsedEffortArray: weekUnUsedEffortArray
+        };
     }
 }
